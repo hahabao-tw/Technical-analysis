@@ -63,6 +63,7 @@
   #outro .nx small{display:block;font-size:34px;color:var(--lo);letter-spacing:.2em;font-weight:500;margin-bottom:6px}
   #preload{position:absolute;left:-9999px;top:0;opacity:0}
 </style>
+<link rel="stylesheet" href="theme.css" />
 </head>
 <body>
 <div id="root" data-composition-id="ep01" data-start="0" data-duration="__TOTAL__" data-width="1080" data-height="1920" data-fps="30">
@@ -108,11 +109,13 @@
 <script type="module">
 import * as THREE from "three";
 import { RoomEnvironment } from "./vendor/environments/RoomEnvironment.js";
+import theme from "./theme.js";
 
 const EP = window.__EP, host = window.__ep;
 const W = 1080, H = 1920;
 const $ = (id) => document.getElementById(id);
 
+theme.dom?.($);
 // ---------- fonts: load every glyph used before the first frame ----------
 const allText = document.body.innerText + EP.segs.map((s) => s.text).join("") +
   "高點低點HHHLLHLL多頭結構空頭盤整前高前低過不了跌破結構破壞假跌破大黑K收盤站回沒有方向轉折點波段";
@@ -120,6 +123,7 @@ $("preload").innerHTML = `<span style="font-weight:500">${allText}</span><span s
 await Promise.all([
   document.fonts.load('500 40px "Noto Sans TC"', allText),
   document.fonts.load('900 40px "Noto Sans TC"', allText),
+  ...(theme.fonts || []).map((f) => document.fonts.load(f, allText)),
 ]);
 await document.fonts.ready;
 
@@ -169,7 +173,7 @@ const glowTex = (() => { const c = document.createElement("canvas"); c.width = c
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
 
 // ---------- data ----------
-const COL = { up: 0xff3b5c, dn: 0x19d27c, hi: 0xffc940, lo: 0x39c6ff, red: 0xff2a4a, white: 0xffffff };
+const COL = { up: 0xff3b5c, dn: 0x19d27c, hi: 0xffc940, lo: 0x39c6ff, red: 0xff2a4a, white: 0xffffff, ...(theme.colors || {}) };
 const X0 = -2.9, X1 = 2.9;
 
 function series(levels, perLeg, seed, noise = 0.1) {
@@ -214,10 +218,13 @@ const D = {
   const nx = d.bars[hi + 5]; nx.o = 2.42; nx.c = 2.75; nx.l = 2.36; nx.h = 2.82;
   d.big = hi + 1; d.pierce = hi + 4; d.support = 2.0; })();
 
+const ctx = { THREE, scene, camera, renderer, floor, grid, wall, key, rim, glowTex, rng, D, X0, X1, $, W, H, COL };
+theme.setup?.(ctx);
 // ---------- 3D builders ----------
 const boxG = new THREE.BoxGeometry(1, 1, 1);
+const bodyG = theme.bodyGeo?.(THREE) || boxG;
 const cylG = new THREE.CylinderGeometry(1, 1, 1, 12);
-const sphG = new THREE.SphereGeometry(1, 32, 16);
+const sphG = theme.markerGeo?.(THREE) || new THREE.SphereGeometry(1, 32, 16);
 
 function mats(g) { // per-group materials so each group fades independently
   const m = (color, extra = {}) => { const mm = new THREE.MeshPhysicalMaterial({ color, roughness: 0.25, metalness: 0.15,
@@ -230,17 +237,19 @@ function buildChart(d) {
   const M = mats(g), bw = d.dx * 0.62, depth = 0.34;
   d.meshes = d.bars.map((b) => {
     const up = b.c >= b.o;
-    const body = new THREE.Mesh(boxG, up ? M.up : M.dn); body.castShadow = true;
+    const body = new THREE.Mesh(bodyG, up ? M.up : M.dn); body.castShadow = true;
     const wick = new THREE.Mesh(cylG, up ? M.wu : M.wd); wick.castShadow = true;
-    body.scale.set(bw, 1, depth); wick.scale.set(0.022, 1, 0.022);
+    body.scale.set(bw, 1, theme.roundBodies ? bw : depth); wick.scale.set(0.022, 1, 0.022);
     body.position.x = wick.position.x = b.x; g.add(body, wick); return { body, wick };
   });
   scene.add(g); d.group = g; return g;
 }
 function setBars(d, reveal, from = 0) { // reveal 0..1 grows bars left->right
+  d.lastVisible = -1;
   const n = d.bars.length;
   d.bars.forEach((b, i) => {
     const s = i < from ? 1 : eout(clamp(reveal * (n - from) - (i - from) * 0.85, 0, 1));
+    if (s > 0.5) d.lastVisible = i;
     const { body, wick } = d.meshes[i];
     const bot = Math.min(b.o, b.c), hh = Math.max(0.03, Math.abs(b.c - b.o));
     body.visible = wick.visible = s > 0.001;
@@ -350,7 +359,7 @@ function swingLabels(d, prefix, p0, p1, t, names) { // names(s, idx) -> [text, c
 function chunks(text) {
   const parts = text.replace(/([，。？！；：、])/g, "$1|").split("|").filter(Boolean);
   const out = []; let cur = "";
-  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
+  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！；]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
   if (cur) out.push(cur); return out.map((c) => c.replace(/[，。；：、]$/, ""));
 }
 const SUBS = []; EP.segs.forEach((s) => { const cs = chunks(s.text), tot = cs.reduce((a, c) => a + c.length + 2, 0); let acc = 0;
@@ -365,7 +374,7 @@ const win = (i) => [i === 0 ? 0 : T(i) - 0.35, i === S.length - 1 ? EP.total : T
 function vis(t, a, b, fi = 0.45, fo = 0.45) { return Math.min(lin(t, a, a + fi), 1 - lin(t, b - fo, b)); }
 
 const charts = { hook: [0], bull: [1, 2], bear: [3], range: [4], brk: [5], mis: [6], bull2: [7] };
-const titleFor = ["", "先找<span style='color:var(--hi)'>轉折點</span><small>SWING POINTS</small>", "<span style='color:var(--up)'>多頭結構</span><small>HIGHER HIGH · HIGHER LOW</small>",
+const titleFor = theme.titles || ["", "先找<span style='color:var(--hi)'>轉折點</span><small>SWING POINTS</small>", "<span style='color:var(--up)'>多頭結構</span><small>HIGHER HIGH · HIGHER LOW</small>",
   "<span style='color:var(--down)'>空頭結構</span><small>LOWER HIGH · LOWER LOW</small>", "<span style='color:#a9b6ff'>盤整</span><small>沒有方向的高低點</small>",
   "<span style='color:var(--up)'>結構破壞</span><small>趨勢反轉的第一個警訊</small>", "兩個<span style='color:var(--up)'>常見錯誤</span><small>COMMON MISTAKES</small>", ""];
 
@@ -400,9 +409,9 @@ host.render = (t) => {
   { const d = D.hook, s0 = T(0), du = S[0].dur;
     setBars(d, lin(t, s0, s0 + du * 0.3));
     hookLines.forEach((m, i) => m.userData.set(lin(t, s0 + 0.4 + i * 0.12, s0 + 0.9 + i * 0.12) * (1 - lin(t, s0 + du * 0.5, s0 + du * 0.62))));
-    const q = vis(t, 0, s0 + du * 0.5, 0.3, 0.4); $("hook").style.opacity = q; $("hook").style.transform = `translateY(${(1 - eout(clamp(q))) * 40}px)`;
+    const q = vis(t, 0, s0 + du * 0.5, 0.3, 0.4); $("hook").style.opacity = q; $("hook").style.translate = `0 ${(1 - eout(clamp(q))) * 40}px`;
     const tc = vis(t, s0 + du * 0.55, win(0)[1], 0.5, 0.4);
-    $("tcard").style.opacity = tc; $("tcard").style.transform = `scale(${0.8 + 0.2 * back(clamp(lin(t, s0 + du * 0.55, s0 + du * 0.55 + .6)))})`; }
+    $("tcard").style.opacity = tc; $("tcard").style.scale = `${0.8 + 0.2 * back(clamp(lin(t, s0 + du * 0.55, s0 + du * 0.55 + .6)))}`; }
   // S1 swing points (bull)
   { const d = D.bull, s1 = T(1), du = S[1].dur;
     setBars(d, t < s1 ? 0 : lin(t, s1, s1 + du * 0.35));
@@ -457,17 +466,17 @@ host.render = (t) => {
     else d.halo.userData.base = 0;
     const cards = [[0.05, 0.22], [0.22, 0.45], [0.5, 0.75], [0.72, 0.95]];
     cards.forEach(([p0], i) => { const el = $("c" + (i + 1)); const q = si === 6 ? vis(t, s6 + du * p0, win(6)[1], 0.4, 0.35) : 0;
-      el.style.opacity = q; el.style.transform = `translateX(${(1 - eout(clamp(q))) * (i % 2 ? 120 : -120)}px)`; });
+      el.style.opacity = q; el.style.translate = `${(1 - eout(clamp(q))) * (i % 2 ? 120 : -120)}px 0`; });
     $("cards").style.opacity = si === 6 ? 1 : 0; }
   // S7 outro
   { const s7 = T(7), du = S[7].dur; const q = si === 7 ? vis(t, s7 - 0.2, EP.total, 0.5, 0.6) : 0;
-    $("outro").style.opacity = q; $("outro").querySelector(".m").style.transform = `scale(${0.85 + 0.15 * back(clamp(lin(t, s7, s7 + 0.7)))})`;
+    $("outro").style.opacity = q; $("outro").querySelector(".m").style.scale = `${0.85 + 0.15 * back(clamp(lin(t, s7, s7 + 0.7)))}`;
     $("outro").querySelector(".nx").style.opacity = lin(t, s7 + du * 0.45, s7 + du * 0.6); }
 
   // ---- title ----
   const tt = titleFor[si]; const tq = tt ? vis(t, a + 0.1, b, 0.4, 0.35) : 0;
   if ($("title").dataset.t !== tt) { $("title").innerHTML = tt; $("title").dataset.t = tt; }
-  $("title").style.opacity = tq; $("title").style.transform = `translateY(${(1 - eout(clamp(tq))) * -30}px)`;
+  $("title").style.opacity = tq; $("title").style.translate = `0 ${(1 - eout(clamp(tq))) * -30}px`;
 
   // ---- subtitle ----
   const cur = SUBS.find((x) => t >= x.st - 0.05 && t < x.en + 0.15);
@@ -477,6 +486,7 @@ host.render = (t) => {
   subEl.style.top = si === 6 ? "1540px" : "1420px";
 
   for (const id in pool) if (!used.has(id)) pool[id].style.display = "none";
+  theme.update?.(t, { ...ctx, si, lt, sp, S, T, E, EP, win, vis, lin, ease, eout, back, clamp, dkey: ["hook", "bull", "bull", "bear", "range", "brk", "mis", "bull"][si] });
   renderer.render(scene, camera);
 };
 host.render(host.clock.t);

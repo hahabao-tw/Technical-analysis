@@ -1,7 +1,9 @@
 """Build index.html from template.html + narration audio timing."""
 import json, os, subprocess
-HERE = os.path.dirname(os.path.abspath(__file__))
-segs = json.load(open(f"{HERE}/narration.json"))
+import sys
+SRC = os.path.dirname(os.path.abspath(__file__))           # ep01 (template + narration)
+HERE = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else SRC  # project dir to build
+segs = json.load(open(f"{SRC}/narration.json"))
 LEAD, GAP, TAIL = 0.4, 0.45, 1.8
 def dur(p):
     return float(subprocess.check_output(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",p]).decode())
@@ -15,7 +17,7 @@ for i, s in enumerate(segs):
     out.append({"id": s["id"], "text": s["text"], "start": round(t, 3), "dur": round(d, 3)})
     t += d + GAP
 total = round(t - GAP + TAIL, 2)
-html = open(f"{HERE}/template.html.tpl").read()
+html = open(f"{SRC}/template.html.tpl").read()
 html = html.replace("__TIMING__", json.dumps({"total": total, "segs": out}, ensure_ascii=False))
 html = html.replace("__TOTAL__", str(total)).replace("__AUDIO__", "\n  ".join(audio))
 open(f"{HERE}/index.html", "w").write(html)
