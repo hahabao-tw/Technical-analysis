@@ -1,0 +1,486 @@
+<!doctype html>
+<!--
+  EP01 市場結構：用高低點判斷趨勢
+  Seek-safe: everything is drawn by render(t), driven by one linear GSAP clock.
+  Built by build.py, which fills in __TIMING__ / __AUDIO__ from the narration audio.
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<title>EP01 市場結構</title>
+<link rel="stylesheet" href="fonts/500.css" />
+<link rel="stylesheet" href="fonts/900.css" />
+<script src="vendor/gsap.min.js"></script>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<style>
+  :root{--up:#ff3b5c;--down:#19d27c;--hi:#ffc940;--lo:#39c6ff;--ink:#eef2ff;--muted:#9aa6d6}
+  html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#070b18}
+  #root{position:relative;width:1080px;height:1920px;overflow:hidden;
+    background:radial-gradient(900px 1100px at 50% 42%,#1b2754 0%,#0d1430 55%,#070b18 100%);
+    font-family:"Noto Sans TC",sans-serif;color:var(--ink)}
+  #cv{position:absolute;inset:0;width:1080px;height:1920px;display:block}
+  .ov{position:absolute;pointer-events:none}
+  #brand{left:64px;top:96px;font-weight:900;font-size:34px;letter-spacing:.08em;color:#c9d3ff;
+    padding:10px 22px;border:2px solid rgba(160,180,255,.35);border-radius:999px;background:rgba(20,30,70,.55)}
+  #brand b{color:var(--hi)}
+  #prog{left:0;top:0;height:10px;background:linear-gradient(90deg,var(--lo),var(--hi));width:0}
+  #title{left:0;right:0;top:190px;text-align:center;font-weight:900;font-size:92px;letter-spacing:.04em;
+    text-shadow:0 8px 0 rgba(0,0,0,.35),0 0 40px rgba(120,150,255,.35)}
+  #title small{display:block;font-weight:500;font-size:40px;color:var(--muted);letter-spacing:.12em;margin-top:6px;text-shadow:none}
+  #sub{left:70px;right:70px;top:1420px;text-align:center;font-weight:900;font-size:62px;line-height:1.3;
+    color:#fff;text-shadow:0 4px 0 #000,0 0 18px rgba(0,0,0,.9)}
+  #sub em{font-style:normal;color:var(--hi)}
+  .lbl{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:40px;white-space:nowrap;
+    padding:4px 14px;border-radius:12px;background:rgba(8,12,30,.72);border:2px solid currentColor}
+  .lbl.hi{color:var(--hi)} .lbl.lo{color:var(--lo)} .lbl.up{color:var(--up)} .lbl.dn{color:var(--down)}
+  .lbl.w{color:#fff;font-size:44px} .lbl.big{font-size:52px}
+  #hook{left:60px;right:60px;top:300px;text-align:center;font-weight:900;font-size:84px;line-height:1.25;
+    text-shadow:0 6px 0 rgba(0,0,0,.5)}
+  #hook .q{color:var(--hi)}
+  #tcard{left:0;right:0;top:620px;text-align:center}
+  #tcard .ep{font-weight:900;font-size:48px;letter-spacing:.3em;color:var(--lo)}
+  #tcard .t{font-weight:900;font-size:170px;line-height:1.1;margin:10px 0;
+    background:linear-gradient(180deg,#fff 0%,#ffd76a 60%,#ff9d3c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 12px 0 rgba(0,0,0,.45)) drop-shadow(0 0 50px rgba(255,190,80,.35))}
+  #tcard .s{font-weight:500;font-size:50px;color:#c9d3ff}
+  #flash{inset:0;background:radial-gradient(closest-side,transparent 55%,rgba(255,40,70,.55));opacity:0}
+  #cards{left:70px;right:70px;top:400px}
+  .card{display:flex;align-items:center;gap:26px;margin-bottom:34px;padding:30px 36px;border-radius:30px;
+    font-weight:900;font-size:54px;background:rgba(14,20,48,.86);border:3px solid rgba(255,255,255,.12);
+    box-shadow:0 24px 50px rgba(0,0,0,.45)}
+  .card .ic{flex:none;width:86px;height:86px;border-radius:50%;display:grid;place-items:center;font-size:58px}
+  .card.bad .ic{background:#3a1220;color:var(--up);border:3px solid var(--up)}
+  .card.good .ic{background:#0e3326;color:var(--down);border:3px solid var(--down)}
+  .card small{display:block;font-weight:500;font-size:36px;color:var(--muted);margin-top:4px}
+  #outro{left:60px;right:60px;top:560px;text-align:center}
+  #outro .k{font-weight:900;font-size:66px;color:var(--muted)}
+  #outro .m{font-weight:900;font-size:118px;line-height:1.2;margin:20px 0 70px;
+    text-shadow:0 8px 0 rgba(0,0,0,.45),0 0 40px rgba(255,200,80,.35)}
+  #outro .m span{color:var(--hi)}
+  #outro .nx{display:inline-block;padding:26px 44px;border-radius:28px;background:rgba(14,20,48,.88);
+    border:3px solid var(--lo);font-weight:900;font-size:48px}
+  #outro .nx small{display:block;font-size:34px;color:var(--lo);letter-spacing:.2em;font-weight:500;margin-bottom:6px}
+  #preload{position:absolute;left:-9999px;top:0;opacity:0}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="ep01" data-start="0" data-duration="__TOTAL__" data-width="1080" data-height="1920" data-fps="30">
+  <canvas id="cv" class="clip" data-start="0" data-duration="__TOTAL__" data-track-index="1"></canvas>
+  <div id="labels" class="ov" style="inset:0"></div>
+  <div id="flash" class="ov"></div>
+  <div id="prog" class="ov"></div>
+  <div id="brand" class="ov">技術分析 <b>EP01</b></div>
+  <div id="title" class="ov"></div>
+  <div id="hook" class="ov">畫了一堆線<br/>卻說不出現在<br/>是<span class="q">多頭</span>還是<span class="q">空頭</span>？</div>
+  <div id="tcard" class="ov"><div class="ep">EP 01</div><div class="t">市場結構</div><div class="s">用高低點判斷趨勢</div></div>
+  <div id="cards" class="ov">
+    <div class="card bad" id="c1"><div class="ic">✕</div><div>一根大黑K就喊反轉<small>單根K線不等於結構改變</small></div></div>
+    <div class="card bad" id="c2"><div class="ic">✕</div><div>盤中跌破就當真<small>影線刺穿、收盤站回很常見</small></div></div>
+    <div class="card good" id="c3"><div class="ic">✓</div><div>等收盤價確認跌破<small>以收盤判斷，減少假訊號</small></div></div>
+    <div class="card good" id="c4"><div class="ic">✓</div><div>固定同一時間週期<small>日線就看日線，別混著看</small></div></div>
+  </div>
+  <div id="outro" class="ov"><div class="k">記住一句話</div><div class="m">趨勢<br/>就是<span>高低點</span><br/>的方向</div>
+    <div class="nx"><small>NEXT · EP02</small>支撐壓力為什麼會互換？</div></div>
+  <div id="sub" class="ov"></div>
+  <div id="preload"></div>
+  __AUDIO__
+</div>
+
+<script>
+  window.__EP = __TIMING__;
+  (function () {
+    var total = window.__EP.total;
+    var clock = { t: 0 };
+    var host = { clock: clock, render: null };
+    window.__ep = host;
+    window.__hf = window.__hf || {};
+    window.__hf.buildReady = window.__hf.buildReady || {};
+    window.__hf.buildReady["ep01"] = new Promise(function (r) { host.ready = r; });
+    var tl = gsap.timeline({ paused: true });
+    tl.to(clock, { t: total, duration: total, ease: "none",
+      onUpdate: function () { if (host.render) host.render(clock.t); } });
+    window.__timelines = window.__timelines || {};
+    window.__timelines["ep01"] = tl;
+  })();
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "./vendor/environments/RoomEnvironment.js";
+
+const EP = window.__EP, host = window.__ep;
+const W = 1080, H = 1920;
+const $ = (id) => document.getElementById(id);
+
+// ---------- fonts: load every glyph used before the first frame ----------
+const allText = document.body.innerText + EP.segs.map((s) => s.text).join("") +
+  "高點低點HHHLLHLL多頭結構空頭盤整前高前低過不了跌破結構破壞假跌破大黑K收盤站回沒有方向轉折點波段";
+$("preload").innerHTML = `<span style="font-weight:500">${allText}</span><span style="font-weight:900">${allText}</span>`;
+await Promise.all([
+  document.fonts.load('500 40px "Noto Sans TC"', allText),
+  document.fonts.load('900 40px "Noto Sans TC"', allText),
+]);
+await document.fonts.ready;
+
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lin = (t, a, b) => clamp((t - a) / (b - a));
+const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const eout = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ canvas: $("cv"), antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.fog = new THREE.Fog(0x0a1030, 22, 40);
+
+const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 200);
+scene.add(new THREE.HemisphereLight(0x8fa8ff, 0x0a0f22, 0.7));
+const key = new THREE.DirectionalLight(0xffffff, 2.0);
+key.position.set(-6, 12, 10); key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -4, near: 1, far: 40 });
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x7fb0ff, 1.4); rim.position.set(8, 4, -8); scene.add(rim);
+
+// floor + grid + back wall grid
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60),
+  new THREE.MeshLambertMaterial({ color: 0x0a1028 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -0.35; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.GridHelper(40, 80, 0x3550a8, 0x1c2a60);
+grid.position.y = -0.34; grid.material.transparent = true; grid.material.opacity = 0.45; scene.add(grid);
+const wall = new THREE.GridHelper(14, 28, 0x2a3f88, 0x18244f);
+wall.rotation.x = Math.PI / 2; wall.position.set(0, 3, -1.6);
+wall.material.transparent = true; wall.material.opacity = 0.35; scene.add(wall);
+
+// glow sprite texture
+const glowTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"); const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.25, "rgba(255,255,255,.55)"); gr.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+
+// ---------- data ----------
+const COL = { up: 0xff3b5c, dn: 0x19d27c, hi: 0xffc940, lo: 0x39c6ff, red: 0xff2a4a, white: 0xffffff };
+const X0 = -2.9, X1 = 2.9;
+
+function series(levels, perLeg, seed, noise = 0.1) {
+  const r = rng(seed), bars = [], swings = [];
+  let prev = levels[0];
+  for (let L = 1; L < levels.length; L++) {
+    const a = levels[L - 1], b = levels[L], upLeg = b > a;
+    for (let j = 0; j < perLeg; j++) {
+      const last = j === perLeg - 1;
+      let c = a + ((b - a) * (j + 1)) / perLeg + (last ? 0 : (r() - 0.5) * 2 * noise);
+      const o = prev;
+      if (last) c = upLeg ? b - 0.1 - r() * 0.06 : b + 0.1 + r() * 0.06;
+      let hi = Math.max(o, c) + 0.04 + r() * 0.12, lo = Math.min(o, c) - 0.04 - r() * 0.12;
+      if (last) { if (upLeg) hi = b; else lo = b; }
+      if (upLeg) { hi = last ? hi : Math.min(hi, b - 0.04); lo = Math.max(lo, a + 0.03); }
+      else { lo = last ? lo : Math.max(lo, b + 0.04); hi = Math.min(hi, a - 0.03); }
+      bars.push({ o, c, h: Math.max(hi, o, c), l: Math.min(lo, o, c) });
+      prev = c;
+    }
+    swings.push({ i: bars.length - 1, type: upLeg ? "H" : "L", y: b });
+  }
+  const n = bars.length, dx = (X1 - X0) / (n - 1);
+  bars.forEach((b, i) => (b.x = X0 + i * dx));
+  swings.forEach((s) => (s.x = bars[s.i].x));
+  return { bars, swings, dx };
+}
+
+const D = {
+  hook: (() => { const r = rng(7), lv = [2.6]; for (let i = 0; i < 9; i++) lv.push(1.4 + r() * 2.6); return series(lv, 3, 11, 0.22); })(),
+  bull: series([0.6, 1.8, 1.1, 2.8, 2.0, 3.8, 3.0, 4.8], 4, 21),
+  bear: series([4.8, 3.6, 4.3, 2.6, 3.4, 1.6, 2.4, 0.6], 4, 31),
+  range: series([2.4, 3.6, 1.7, 3.3, 1.5, 3.8, 1.9, 3.0], 4, 41, 0.14),
+  brk: series([0.6, 2.0, 1.3, 3.2, 2.4, 2.9, 1.7, 2.1], 4, 51),
+  mis: series([0.8, 2.6, 2.0, 3.4, 2.3, 4.4], 5, 61),
+};
+// mistake dataset: big black K at start of pullback, and a wick that pierces support but closes back above
+(() => { const d = D.mis, s = d.swings; const hi = s[2].i; // swing high index (3.4)
+  const bk = d.bars[hi + 1]; bk.o = 3.3; bk.c = 2.55; bk.h = 3.33; bk.l = 2.5;
+  d.bars[hi + 2].o = 2.55; d.bars[hi + 2].c = 2.62; d.bars[hi + 2].h = 2.8; d.bars[hi + 2].l = 2.42;
+  d.bars[hi + 3].o = 2.62; d.bars[hi + 3].c = 2.4; d.bars[hi + 3].h = 2.66; d.bars[hi + 3].l = 2.35;
+  const pw = d.bars[hi + 4]; pw.o = 2.4; pw.c = 2.42; pw.l = 1.72; pw.h = 2.5;   // lower wick through 2.0
+  const nx = d.bars[hi + 5]; nx.o = 2.42; nx.c = 2.75; nx.l = 2.36; nx.h = 2.82;
+  d.big = hi + 1; d.pierce = hi + 4; d.support = 2.0; })();
+
+// ---------- 3D builders ----------
+const boxG = new THREE.BoxGeometry(1, 1, 1);
+const cylG = new THREE.CylinderGeometry(1, 1, 1, 12);
+const sphG = new THREE.SphereGeometry(1, 32, 16);
+
+function mats(g) { // per-group materials so each group fades independently
+  const m = (color, extra = {}) => { const mm = new THREE.MeshPhysicalMaterial({ color, roughness: 0.25, metalness: 0.15,
+    clearcoat: 1, clearcoatRoughness: 0.15, emissive: color, emissiveIntensity: 0.22, transparent: true, ...extra }); g.userData.mats.push(mm); return mm; };
+  return { up: m(COL.up), dn: m(COL.dn), wu: m(COL.up, { emissiveIntensity: 0.4 }), wd: m(COL.dn, { emissiveIntensity: 0.4 }) };
+}
+
+function buildChart(d) {
+  const g = new THREE.Group(); g.userData.mats = []; g.userData.sprites = [];
+  const M = mats(g), bw = d.dx * 0.62, depth = 0.34;
+  d.meshes = d.bars.map((b) => {
+    const up = b.c >= b.o;
+    const body = new THREE.Mesh(boxG, up ? M.up : M.dn); body.castShadow = true;
+    const wick = new THREE.Mesh(cylG, up ? M.wu : M.wd); wick.castShadow = true;
+    body.scale.set(bw, 1, depth); wick.scale.set(0.022, 1, 0.022);
+    body.position.x = wick.position.x = b.x; g.add(body, wick); return { body, wick };
+  });
+  scene.add(g); d.group = g; return g;
+}
+function setBars(d, reveal, from = 0) { // reveal 0..1 grows bars left->right
+  const n = d.bars.length;
+  d.bars.forEach((b, i) => {
+    const s = i < from ? 1 : eout(clamp(reveal * (n - from) - (i - from) * 0.85, 0, 1));
+    const { body, wick } = d.meshes[i];
+    const bot = Math.min(b.o, b.c), hh = Math.max(0.03, Math.abs(b.c - b.o));
+    body.visible = wick.visible = s > 0.001;
+    body.scale.y = hh * s; body.position.y = bot + (hh * s) / 2;
+    wick.scale.y = (b.h - b.l) * s; wick.position.y = b.l + ((b.h - b.l) * s) / 2;
+  });
+}
+function setOpacity(g, o) {
+  g.visible = o > 0.001;
+  g.userData.mats.forEach((m) => { m.opacity = o; m.depthWrite = o > 0.6; });
+  g.userData.sprites.forEach((s) => (s.material.opacity = o * (s.userData.base ?? 1)));
+}
+
+function marker(g, x, y, color) {
+  const m = new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 0.9, roughness: 0.2, clearcoat: 1, transparent: true });
+  g.userData.mats.push(m);
+  const s = new THREE.Mesh(sphG, m); s.position.set(x, y, 0.25); s.scale.setScalar(0.0001);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  sp.position.copy(s.position); sp.scale.setScalar(0.0001); sp.userData.base = 0.9;
+  g.userData.sprites.push(sp); g.add(s, sp); return { s, sp };
+}
+function setMarker(mk, p, r = 0.13) { const k = back(clamp(p)); mk.s.scale.setScalar(Math.max(1e-4, r * k)); mk.sp.scale.setScalar(Math.max(1e-4, r * 7 * k)); }
+
+function tube(g, pts, color, radius = 0.045) {
+  const curve = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(p[0], p[1], 0.25)), false, "catmullrom", 0);
+  const segs = 200, geo = new THREE.TubeGeometry(curve, segs, radius, 10, false);
+  const m = new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 1.1, roughness: 0.3, transparent: true });
+  g.userData.mats.push(m);
+  const mesh = new THREE.Mesh(geo, m); g.add(mesh);
+  mesh.userData.set = (p) => { const k = Math.floor(clamp(p) * segs); mesh.visible = k > 0; geo.setDrawRange(0, k * 10 * 6); };
+  mesh.userData.set(0); return mesh;
+}
+// polyline as straight segments: use linear curve by densifying points
+function poly(points) { const out = []; for (let i = 0; i < points.length - 1; i++) for (let k = 0; k < 12; k++) {
+  const t = k / 12; out.push([points[i][0] + (points[i + 1][0] - points[i][0]) * t, points[i][1] + (points[i + 1][1] - points[i][1]) * t]); }
+  out.push(points[points.length - 1]); return out; }
+
+function hline(g, x0, x1, y, color, dashed = false) {
+  const grp = new THREE.Group();
+  const m = new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 1.0, transparent: true });
+  g.userData.mats.push(m);
+  const n = dashed ? 18 : 1, len = (x1 - x0) / n;
+  for (let i = 0; i < n; i++) { const c = new THREE.Mesh(cylG, m); c.rotation.z = Math.PI / 2;
+    c.scale.set(0.03, dashed ? len * 0.55 : len, 0.03); c.position.set(x0 + len * (i + 0.5), y, 0.3); grp.add(c); }
+  g.add(grp); grp.userData.set = (p) => { const k = clamp(p); grp.visible = k > 0.001;
+    grp.children.forEach((c, i) => (c.visible = (i + 0.5) / n <= k || (!dashed && k > 0))); if (!dashed) { grp.children[0].scale.y = len * k; grp.children[0].position.x = x0 + (len * k) / 2; } };
+  grp.userData.set(0); return grp;
+}
+
+// build all charts
+for (const k of Object.keys(D)) buildChart(D[k]);
+
+// hook messy lines
+const hookLines = (() => { const r = rng(99), out = [], cols = [0xff7ad9, 0x7affd4, 0xffe27a, 0x8aa0ff, 0xff9a5a, 0x5ad1ff];
+  for (let i = 0; i < 14; i++) { const a = [X0 + r() * 2, 0.8 + r() * 3.8], b = [X1 - r() * 2, 0.8 + r() * 3.8];
+    out.push(tube(D.hook.group, poly([a, b]), cols[i % cols.length], 0.03)); } return out; })();
+
+// markers per dataset
+function swingMarkers(d) { d.mk = d.swings.map((s) => s.type === "H" ? marker(d.group, s.x, s.y + 0.24, COL.hi) : marker(d.group, s.x, s.y - 0.24, COL.lo)); }
+["bull", "bear", "range", "brk", "mis"].forEach((k) => swingMarkers(D[k]));
+function structLines(d, upto = 99) {
+  const hs = d.swings.filter((s, i) => s.type === "H" && i < upto).map((s) => [s.x, s.y + 0.24]);
+  const ls = [[d.bars[0].x, d.bars[0].l - 0.24], ...d.swings.filter((s, i) => s.type === "L" && i < upto).map((s) => [s.x, s.y - 0.24])];
+  return { h: tube(d.group, poly(hs), COL.hi), l: tube(d.group, poly(ls), COL.lo) };
+}
+D.bull.lines = structLines(D.bull);
+D.bear.lines = (() => { const d = D.bear; const hs = [[d.bars[0].x, d.bars[0].h + 0.24], ...d.swings.filter((s) => s.type === "H").map((s) => [s.x, s.y + 0.24])];
+  const ls = d.swings.filter((s) => s.type === "L").map((s) => [s.x, s.y - 0.24]); return { h: tube(d.group, poly(hs), COL.hi), l: tube(d.group, poly(ls), COL.lo) }; })();
+// range band
+D.range.band = (() => { const m = new THREE.MeshBasicMaterial({ color: 0x8aa0ff, transparent: true, depthWrite: false });
+  const b = new THREE.Mesh(boxG, m); b.scale.set(X1 - X0 + 0.6, 3.8 - 1.5 + 0.5, 0.9); b.position.set(0, (3.8 + 1.5) / 2, 0); D.range.group.add(b); return { mesh: b, mat: m }; })();
+// break: structure lines (until LH), prior high & prior low levels
+(() => { const d = D.brk, s = d.swings; // s: H2.0 L1.3 H3.2 L2.4 H2.9(LH) L1.7(break) H2.1
+  d.lines = { h: tube(d.group, poly([[s[0].x, s[0].y + .24], [s[2].x, s[2].y + .24]]), COL.hi), l: tube(d.group, poly([[d.bars[0].x, d.bars[0].l - .24], [s[1].x, s[1].y - .24], [s[3].x, s[3].y - .24]]), COL.lo) };
+  d.lh = tube(d.group, poly([[s[2].x, s[2].y + .24], [s[4].x, s[4].y + .24]]), COL.red, 0.05);
+  d.ll = tube(d.group, poly([[s[3].x, s[3].y - .24], [s[5].x, s[5].y - .24]]), COL.red, 0.05);
+  d.ph = hline(d.group, s[2].x, X1 + 0.3, s[2].y, COL.hi, true);
+  d.pl = hline(d.group, s[3].x, X1 + 0.3, s[3].y, COL.lo, false); })();
+// mistake: support line
+D.mis.sup = hline(D.mis.group, X0, X1 + 0.3, D.mis.support, COL.lo, false);
+D.mis.halo = (() => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  sp.userData.base = 0.5; D.mis.group.userData.sprites.push(sp); D.mis.group.add(sp); return sp; })();
+
+// ---------- DOM label pool ----------
+const labelHost = $("labels"), pool = {};
+const v3 = new THREE.Vector3();
+let used = new Set();
+let sceneVis = 1;
+function label(id, text, x, y, cls, o, z = 0.3) {
+  o = Math.min(o, sceneVis);
+  if (o <= 0.01) return;
+  let el = pool[id]; if (!el) { el = document.createElement("div"); labelHost.appendChild(el); pool[id] = el; }
+  if (el.dataset.t !== text) { el.innerHTML = text; el.dataset.t = text; }
+  el.className = "lbl " + cls;
+  v3.set(x, y, z).project(camera);
+  const k = back(clamp(o));
+  el.style.left = ((v3.x + 1) / 2) * W + "px"; el.style.top = ((1 - v3.y) / 2) * H + "px";
+  el.style.opacity = clamp(o); el.style.transform = `translate(-50%,-50%) scale(${0.6 + 0.4 * k})`;
+  el.style.display = "block"; used.add(id);
+}
+function swingLabels(d, prefix, p0, p1, t, names) { // names(s, idx) -> [text, cls]
+  d.swings.forEach((s, i) => { const a = p0 + (p1 - p0) * (i / d.swings.length); const o = lin(t, a, a + 0.35);
+    const [tx, cls] = names(s, i); if (!tx) return; label(prefix + i, tx, s.x, s.type === "H" ? s.y + 0.72 : s.y - 0.72, cls, o); });
+}
+
+// ---------- subtitles ----------
+function chunks(text) {
+  const parts = text.replace(/([，。？！；：、])/g, "$1|").split("|").filter(Boolean);
+  const out = []; let cur = "";
+  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
+  if (cur) out.push(cur); return out.map((c) => c.replace(/[，。；：、]$/, ""));
+}
+const SUBS = []; EP.segs.forEach((s) => { const cs = chunks(s.text), tot = cs.reduce((a, c) => a + c.length + 2, 0); let acc = 0;
+  cs.forEach((c) => { const st = s.start + (acc / tot) * s.dur; acc += c.length + 2; SUBS.push({ st, en: s.start + (acc / tot) * s.dur, text: c }); }); });
+const HL = ["多頭", "空頭", "盤整", "市場結構", "高點", "低點", "前高", "前低", "收盤價", "警訊", "高低點的方向", "壓力"];
+const HLRE = new RegExp(HL.slice().sort((a, b) => b.length - a.length).join("|"), "g");
+function hl(t) { return t.replace(HLRE, (m) => `<em>${m}</em>`); }
+
+// ---------- timing ----------
+const S = EP.segs; const T = (i) => S[i].start; const E = (i) => S[i].start + S[i].dur;
+const win = (i) => [i === 0 ? 0 : T(i) - 0.35, i === S.length - 1 ? EP.total : T(i + 1) - 0.35];
+function vis(t, a, b, fi = 0.45, fo = 0.45) { return Math.min(lin(t, a, a + fi), 1 - lin(t, b - fo, b)); }
+
+const charts = { hook: [0], bull: [1, 2], bear: [3], range: [4], brk: [5], mis: [6], bull2: [7] };
+const titleFor = ["", "先找<span style='color:var(--hi)'>轉折點</span><small>SWING POINTS</small>", "<span style='color:var(--up)'>多頭結構</span><small>HIGHER HIGH · HIGHER LOW</small>",
+  "<span style='color:var(--down)'>空頭結構</span><small>LOWER HIGH · LOWER LOW</small>", "<span style='color:#a9b6ff'>盤整</span><small>沒有方向的高低點</small>",
+  "<span style='color:var(--up)'>結構破壞</span><small>趨勢反轉的第一個警訊</small>", "兩個<span style='color:var(--up)'>常見錯誤</span><small>COMMON MISTAKES</small>", ""];
+
+function cam(theta, dist, y, look, phi = 0.08) {
+  camera.position.set(Math.sin(theta) * dist, y + Math.sin(phi) * dist * 0.2, Math.cos(theta) * dist);
+  camera.lookAt(0, look, 0);
+  camera.updateMatrixWorld(true);
+}
+
+host.render = (t) => {
+  used = new Set();
+  $("prog").style.width = (t / EP.total) * 100 + "%";
+  // scene index
+  let si = 0; for (let i = 0; i < S.length; i++) if (t >= win(i)[0]) si = i;
+  const [a, b] = win(si), lt = t - a, sp = b - a;
+  sceneVis = vis(t, a, b, 0.3, 0.35);
+
+  // ---- charts visibility ----
+  const wv = (ids) => Math.max(...ids.map((i) => vis(t, win(i)[0], win(i)[1])));
+  const o = { hook: Math.min(wv([0]), 1 - lin(t, T(0) + S[0].dur * 0.5, T(0) + S[0].dur * 0.6)), bull: Math.max(wv([1, 2]) > 0 && t < win(2)[1] ? Math.min(lin(t, win(1)[0], win(1)[0] + .45), 1 - lin(t, win(2)[1] - .45, win(2)[1])) : 0, si === 7 ? 0.28 * vis(t, win(7)[0], win(7)[1]) : 0),
+    bear: wv([3]), range: wv([4]), brk: wv([5]), mis: si === 6 ? vis(t, win(6)[0], win(6)[1]) * 0.42 : 0 };
+  for (const k of Object.keys(D)) { const ok = o[k] ?? 0; setOpacity(D[k].group, ok); D[k].group.position.y = (1 - ease(clamp(ok))) * -0.6; }
+
+  // ---- camera (gentle orbit per scene) ----
+  const camCfg = [[-0.18, 0.12, 20.5], [-0.15, 0.02, 20.5], [0.02, 0.16, 20.5], [0.15, -0.02, 20.5], [-0.12, 0.1, 20.5], [-0.1, 0.12, 20.5], [0.08, -0.05, 21], [-0.08, 0.08, 21.5]];
+  const [th0, th1, dist] = camCfg[si]; const cp = ease(clamp(lt / sp));
+  let dd = dist; if (si === 5) dd = dist - 1.3 * ease(lin(t, T(5) + S[5].dur * 0.55, T(5) + S[5].dur * 0.8));
+  cam(th0 + (th1 - th0) * cp, dd, 3.4, 2.55);
+
+  // ---- per scene ----
+  // S0 hook
+  { const d = D.hook, s0 = T(0), du = S[0].dur;
+    setBars(d, lin(t, s0, s0 + du * 0.3));
+    hookLines.forEach((m, i) => m.userData.set(lin(t, s0 + 0.4 + i * 0.12, s0 + 0.9 + i * 0.12) * (1 - lin(t, s0 + du * 0.5, s0 + du * 0.62))));
+    const q = vis(t, 0, s0 + du * 0.5, 0.3, 0.4); $("hook").style.opacity = q; $("hook").style.transform = `translateY(${(1 - eout(clamp(q))) * 40}px)`;
+    const tc = vis(t, s0 + du * 0.55, win(0)[1], 0.5, 0.4);
+    $("tcard").style.opacity = tc; $("tcard").style.transform = `scale(${0.8 + 0.2 * back(clamp(lin(t, s0 + du * 0.55, s0 + du * 0.55 + .6)))})`; }
+  // S1 swing points (bull)
+  { const d = D.bull, s1 = T(1), du = S[1].dur;
+    setBars(d, t < s1 ? 0 : lin(t, s1, s1 + du * 0.35));
+    d.swings.forEach((s, i) => { const at = s1 + du * (s.type === "H" ? 0.35 : 0.62) + i * 0.12; setMarker(d.mk[i], lin(t, at, at + 0.5)); });
+    if (si === 1) swingLabels(d, "b1_", s1 + du * 0.35, s1 + du * 0.85, t, (s) => (s.type === "H" ? ["高點", "hi"] : ["低點", "lo"]));
+    // S2 bull structure
+    const s2 = T(2), d2 = S[2].dur;
+    d.lines.h.userData.set(lin(t, s2 + d2 * 0.05, s2 + d2 * 0.42)); d.lines.l.userData.set(lin(t, s2 + d2 * 0.3, s2 + d2 * 0.65));
+    if (si === 2) { swingLabels(d, "b2_", s2, s2 + d2 * 0.6, t, (s, i) => (i === 0 ? ["", ""] : s.type === "H" ? ["HH", "hi"] : ["HL", "lo"])); }
+    if (si === 7) { setBars(d, 1); d.lines.h.userData.set(1); d.lines.l.userData.set(1); d.mk.forEach((m) => setMarker(m, 1)); } }
+  // S3 bear
+  { const d = D.bear, s3 = T(3), du = S[3].dur;
+    setBars(d, lin(t, s3 - 0.3, s3 + du * 0.3));
+    d.swings.forEach((s, i) => setMarker(d.mk[i], lin(t, s3 + du * 0.25 + i * 0.12, s3 + du * 0.25 + i * 0.12 + 0.5)));
+    d.lines.h.userData.set(lin(t, s3 + du * 0.3, s3 + du * 0.6)); d.lines.l.userData.set(lin(t, s3 + du * 0.5, s3 + du * 0.82));
+    if (si === 3) swingLabels(d, "r_", s3 + du * 0.3, s3 + du * 0.8, t, (s, i) => (i === d.swings.length - 1 && s.type === "L" ? ["LL", "lo"] : s.type === "H" ? ["LH", "hi"] : ["LL", "lo"])); }
+  // S4 range
+  { const d = D.range, s4 = T(4), du = S[4].dur;
+    setBars(d, lin(t, s4 - 0.3, s4 + du * 0.3));
+    d.swings.forEach((s, i) => setMarker(d.mk[i], lin(t, s4 + du * 0.25 + i * 0.1, s4 + du * 0.25 + i * 0.1 + 0.5)));
+    const bp = ease(lin(t, s4 + du * 0.45, s4 + du * 0.7)); d.band.mesh.visible = bp > 0.01; d.band.mesh.scale.x = (X1 - X0 + 0.6) * bp;
+    d.band.mat.opacity = 0.1 * bp * (o.range ?? 0);
+    if (si === 4) { swingLabels(d, "g_", s4 + du * 0.3, s4 + du * 0.6, t, (s) => (s.type === "H" ? ["高?", "hi"] : ["低?", "lo"]));
+      label("g_box", "來回洗盤區", 0, 4.75, "w big", lin(t, s4 + du * 0.6, s4 + du * 0.75)); } }
+  // S5 break
+  { const d = D.brk, s5 = T(5), du = S[5].dur, sw = d.swings;
+    // bars appear up to LH quickly, then the breakdown leg as narration hits
+    const iLH = sw[4].i, n = d.bars.length;
+    const r1 = lin(t, s5 - 0.3, s5 + du * 0.18) * ((iLH + 1) / n), r2 = lin(t, s5 + du * 0.42, s5 + du * 0.62) * (1 - (iLH + 1) / n);
+    setBars(d, r1 + r2);
+    [0, 1, 2, 3].forEach((i) => setMarker(d.mk[i], lin(t, s5 + du * 0.1 + i * 0.1, s5 + du * 0.1 + i * 0.1 + 0.5)));
+    d.lines.h.userData.set(lin(t, s5 + du * 0.12, s5 + du * 0.22)); d.lines.l.userData.set(lin(t, s5 + du * 0.15, s5 + du * 0.25));
+    setMarker(d.mk[4], lin(t, s5 + du * 0.3, s5 + du * 0.36)); d.ph.userData.set(lin(t, s5 + du * 0.24, s5 + du * 0.34));
+    d.lh.userData.set(lin(t, s5 + du * 0.3, s5 + du * 0.4));
+    d.pl.userData.set(lin(t, s5 + du * 0.42, s5 + du * 0.5));
+    setMarker(d.mk[5], lin(t, s5 + du * 0.6, s5 + du * 0.66)); d.ll.userData.set(lin(t, s5 + du * 0.6, s5 + du * 0.68));
+    setMarker(d.mk[6], 0);
+    if (si === 5) {
+      label("k_ph", "前高", X1 - 0.35, sw[2].y + 0.42, "hi", lin(t, s5 + du * 0.26, s5 + du * 0.34));
+      label("k_lh", "過不了前高", sw[4].x, sw[4].y + 0.85, "up big", lin(t, s5 + du * 0.32, s5 + du * 0.4));
+      label("k_pl", "前低", X1 - 0.35, sw[3].y + 0.42, "lo", lin(t, s5 + du * 0.44, s5 + du * 0.5));
+      label("k_br", "跌破前低！", sw[5].x + 0.2, sw[5].y - 0.8, "up big", lin(t, s5 + du * 0.62, s5 + du * 0.7));
+    }
+    const fl = si === 5 ? Math.max(0, Math.sin(clamp(lin(t, s5 + du * 0.62, s5 + du * 0.85)) * Math.PI)) : 0;
+    $("flash").style.opacity = fl * 0.9;
+    d.group.userData.mats.forEach((m) => { if (m.color.getHex() === COL.dn || m.color.getHex() === COL.red) m.emissiveIntensity = (m.color.getHex() === COL.red ? 1.1 : 0.22) + fl * 1.2; }); }
+  // S6 mistakes
+  { const d = D.mis, s6 = T(6), du = S[6].dur;
+    setBars(d, lin(t, s6 - 0.3, s6 + du * 0.15)); d.mk.forEach((m) => setMarker(m, 0)); d.sup.userData.set(lin(t, s6, s6 + du * 0.2));
+    const focus = t < s6 + du * 0.22 ? -1 : t < s6 + du * 0.45 ? d.big : d.pierce;
+    if (focus >= 0) { const b = d.bars[focus]; d.halo.position.set(b.x, (b.h + b.l) / 2, 0.4); d.halo.scale.set(1.3, (b.h - b.l) + 1.2, 1); d.halo.userData.base = 0.55; }
+    else d.halo.userData.base = 0;
+    const cards = [[0.05, 0.22], [0.22, 0.45], [0.5, 0.75], [0.72, 0.95]];
+    cards.forEach(([p0], i) => { const el = $("c" + (i + 1)); const q = si === 6 ? vis(t, s6 + du * p0, win(6)[1], 0.4, 0.35) : 0;
+      el.style.opacity = q; el.style.transform = `translateX(${(1 - eout(clamp(q))) * (i % 2 ? 120 : -120)}px)`; });
+    $("cards").style.opacity = si === 6 ? 1 : 0; }
+  // S7 outro
+  { const s7 = T(7), du = S[7].dur; const q = si === 7 ? vis(t, s7 - 0.2, EP.total, 0.5, 0.6) : 0;
+    $("outro").style.opacity = q; $("outro").querySelector(".m").style.transform = `scale(${0.85 + 0.15 * back(clamp(lin(t, s7, s7 + 0.7)))})`;
+    $("outro").querySelector(".nx").style.opacity = lin(t, s7 + du * 0.45, s7 + du * 0.6); }
+
+  // ---- title ----
+  const tt = titleFor[si]; const tq = tt ? vis(t, a + 0.1, b, 0.4, 0.35) : 0;
+  if ($("title").dataset.t !== tt) { $("title").innerHTML = tt; $("title").dataset.t = tt; }
+  $("title").style.opacity = tq; $("title").style.transform = `translateY(${(1 - eout(clamp(tq))) * -30}px)`;
+
+  // ---- subtitle ----
+  const cur = SUBS.find((x) => t >= x.st - 0.05 && t < x.en + 0.15);
+  const subEl = $("sub"); const st = cur ? cur.text : "";
+  if (subEl.dataset.t !== st) { subEl.innerHTML = hl(st); subEl.dataset.t = st; }
+  subEl.style.opacity = cur ? 1 : 0;
+  subEl.style.top = si === 6 ? "1540px" : "1420px";
+
+  for (const id in pool) if (!used.has(id)) pool[id].style.display = "none";
+  renderer.render(scene, camera);
+};
+host.render(host.clock.t);
+host.ready();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+ref3d/
+*/out/*.mp4
+.hyperframes/
+*/.hyperframes/
