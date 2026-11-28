@@ -1,0 +1,6 @@
+node_modules/
+ref3d/
+*/out/
+.hyperframes/
+*/.hyperframes/
+*/audio/*.mp3

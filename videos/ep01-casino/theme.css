@@ -1,0 +1,47 @@
+@import url("themefonts/serif900.css");
+@import url("themefonts/cinzel.css");
+:root{--up:#e8233f;--down:#14b86a;--hi:#f5c451;--lo:#dfe6f0;--ink:#fff8e7;--muted:#e9cf9a;--gold:linear-gradient(180deg,#fff3c4 0%,#f5c451 40%,#b07a1c 70%,#f7d77a 100%)}
+#root{background:radial-gradient(900px 1200px at 50% 38%,#5a0f1c 0%,#2a0710 55%,#100306 100%)}
+#brand{border:2px solid #c9962e;background:rgba(20,4,8,.75);color:var(--ink);border-radius:999px;font-family:"Noto Serif TC";font-size:32px}
+#brand .ms{font-family:"Cinzel";color:var(--hi);margin-right:14px;font-weight:700}
+#prog{background:linear-gradient(90deg,#b07a1c,#fff3c4,#b07a1c)}
+#hud{right:56px;top:84px;text-align:right;padding:14px 26px;border-radius:18px;background:rgba(20,4,8,.8);border:2px solid #c9962e}
+#hud small{display:block;font-family:"Noto Serif TC";font-size:28px;color:var(--muted);letter-spacing:.3em}
+#hud b{font-family:"Cinzel";font-size:58px;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+#hud .delta{font-family:"Cinzel";font-size:30px}
+#title{font-family:"Noto Serif TC";font-size:100px;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(0 6px 0 rgba(0,0,0,.6)) drop-shadow(0 0 30px rgba(245,196,81,.35))}
+#title i{display:block;font-style:normal;font-family:"Noto Serif TC";font-size:38px;letter-spacing:.3em;color:transparent;margin-bottom:8px}
+#hook{font-family:"Noto Serif TC";color:var(--ink)}
+#hook .q{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+#tcard{top:560px}
+#tcard .marquee{display:inline-block;padding:46px 64px 52px;border-radius:40px;background:#1d0509;position:relative;
+  border:16px solid transparent;
+  background-image:linear-gradient(#1d0509,#1d0509),radial-gradient(circle,#fff6c9 0 5px,#f5c451 6px,transparent 8px);
+  background-origin:border-box;background-clip:padding-box,border-box;background-size:auto,28px 28px;
+  background-position:0 0,calc(var(--ph,0) * 14px) 0;box-shadow:0 0 60px rgba(245,196,81,.5),inset 0 0 40px rgba(0,0,0,.8)}
+#tcard .ep{font-family:"Cinzel";font-weight:700;color:var(--hi);letter-spacing:.35em}
+#tcard .t{font-family:"Noto Serif TC";font-size:160px;background:var(--gold);-webkit-background-clip:text;background-clip:text}
+#tcard .s{font-family:"Noto Serif TC";color:var(--muted)}
+#sub{font-size:60px;color:#fff;text-shadow:0 4px 0 #000,0 0 18px rgba(0,0,0,.9)}
+#sub em{color:var(--hi)}
+.lbl{font-family:"Noto Serif TC";border-radius:999px;background:rgba(20,4,8,.85)}
+.lbl.lo{color:#eaf0ff}
+#flash{background:radial-gradient(closest-side,transparent 50%,rgba(232,35,63,.6))}
+#cards{top:560px}
+.card{position:relative;background:#fbf7ee;color:#1a1a1a;border:3px solid #d9cfb8;border-radius:24px;box-shadow:0 22px 40px rgba(0,0,0,.6);font-family:"Noto Serif TC"}
+.card small{color:#6b5c45}
+.card .suit{position:absolute;right:30px;top:22px;font-size:56px;color:#c8102e;font-family:serif}
+.card:nth-child(1) .suit,.card:nth-child(4) .suit{color:#111}
+.card.bad .ic{background:#fde3e6;color:#c8102e;border-color:#c8102e}
+.card.good .ic{background:#dff6ea;color:#0f7a3e;border-color:#0f7a3e}
+#outro{top:560px}
+#outro .k{font-family:"Noto Serif TC";color:var(--muted);letter-spacing:.2em}
+#outro .m{font-family:"Noto Serif TC";font-size:110px;color:var(--ink)}
+#outro .m span{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+#outro .nx{display:inline-flex;align-items:center;gap:28px;text-align:left;border:2px solid #c9962e;background:rgba(20,4,8,.9);font-family:"Noto Serif TC"}
+#outro .nx small{font-family:"Cinzel";color:var(--hi);font-weight:700}
+#outro .chip{flex:none;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;align-content:center;font-family:"Cinzel";font-weight:700;
+  font-size:46px;line-height:1;color:#fff;background:repeating-conic-gradient(#c4142b 0 22.5deg,#fff 22.5deg 30deg);border:6px solid #fff;box-shadow:inset 0 0 0 14px #c4142b}
+#outro .chip b{font-size:22px;letter-spacing:.2em}
+#sub{left:60px;right:60px;padding:14px 20px;border-radius:22px;background:rgba(20,4,8,.78);border:2px solid rgba(201,150,46,.7)}

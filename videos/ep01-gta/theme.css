@@ -1,0 +1,43 @@
+@import url("themefonts/bungee.css");
+:root{--up:#ff2f6d;--down:#1ff2b5;--hi:#ffd23f;--lo:#3df5ff;--ink:#fff;--muted:#ffd9f0}
+#root{background:linear-gradient(180deg,#14062b 0%,#3b0f5c 30%,#a8236f 52%,#ff7a45 62%,#2a0d3d 63%,#12061f 100%)}
+.ov{font-family:"Noto Sans TC",sans-serif}
+/* chunky game lettering: thick black outline + hard drop shadow */
+#title,#hook,#tcard .t,#outro .done,#outro .m,#sub,.card{paint-order:stroke fill}
+#brand{border:none;border-radius:6px;background:rgba(0,0,0,.72);color:#fff;font-size:32px;padding:10px 20px;letter-spacing:.04em;transform:skewX(-8deg)}
+#brand .ms{font-family:"Bungee";color:var(--hi);margin-right:14px;font-weight:400}
+#obj{left:64px;top:170px;font-weight:900;font-size:34px;color:#fff;padding:12px 20px;background:rgba(0,0,0,.6);border-left:8px solid var(--hi);border-radius:4px}
+#obj b{color:var(--hi)}
+#prog{height:12px;background:linear-gradient(90deg,#ff2f8f,#ffd23f)}
+#hud{right:56px;top:92px;text-align:right;font-family:"Bungee"}
+#hud .cash{font-size:60px;color:#7dff9a;-webkit-text-stroke:5px #000;paint-order:stroke fill;text-shadow:4px 4px 0 #000}
+#hud .delta{font-size:34px;-webkit-text-stroke:4px #000;paint-order:stroke fill;margin-top:-4px}
+#hud .bars{margin:10px 0 0 auto;width:250px;height:16px;border:3px solid #000;background:#3a2232}
+#hud .bars i{display:block;height:100%;background:linear-gradient(90deg,#ff3b5c,#ffd23f)}
+#title{top:300px;font-size:104px;color:var(--hi);-webkit-text-stroke:12px #000;text-shadow:8px 8px 0 #000;transform-origin:50% 50%;font-style:normal}
+#title i{display:block;font-family:"Bungee";font-style:normal;font-size:36px;color:#fff;-webkit-text-stroke:6px #000;letter-spacing:.12em;margin-bottom:6px}
+#title{transform:skewX(-8deg)}
+#hook{font-size:88px;-webkit-text-stroke:12px #000;text-shadow:8px 8px 0 #000;transform:skewX(-6deg)}
+#hook .q{color:var(--hi)}
+#tcard .ep{display:inline-block;font-family:"Bungee";font-size:44px;letter-spacing:.1em;color:#fff;background:#ff2f8f;padding:6px 22px;transform:skewX(-10deg);box-shadow:6px 6px 0 #000}
+#tcard .t{font-size:190px;transform:skewX(-8deg);-webkit-text-stroke:0;
+  background:linear-gradient(180deg,#fff6a8 0%,#ffd23f 45%,#ff7a3c 75%,#ff2f8f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 0 #000) drop-shadow(10px 10px 0 #000) drop-shadow(-3px -3px 0 #000) drop-shadow(3px -3px 0 #000)}
+#tcard .s{color:#fff;font-weight:900;-webkit-text-stroke:6px #000;paint-order:stroke fill;font-size:54px}
+#sub{color:#fff;-webkit-text-stroke:10px #000;text-shadow:5px 5px 0 #000;font-size:64px}
+#sub em{color:var(--hi)}
+.lbl{border-radius:4px;background:#000;border-width:3px;font-family:"Noto Sans TC";transform-origin:center}
+.lbl.hi{color:var(--hi)} .lbl.lo{color:var(--lo)}
+#flash{background:linear-gradient(180deg,rgba(255,30,60,.55),transparent 30%,transparent 70%,rgba(40,90,255,.55))}
+#cards{top:560px}
+.card{background:rgba(0,0,0,.78);border:none;border-left:12px solid var(--hi);border-radius:6px;transform:skewX(-4deg);box-shadow:10px 10px 0 rgba(0,0,0,.6)}
+.card.bad{border-left-color:#ff2f6d} .card.good{border-left-color:#1ff2b5}
+.card .ic{border-radius:8px}
+.card small{color:#ffd9f0}
+#outro{top:330px}
+#outro .done{font-weight:900;font-size:150px;color:var(--hi);-webkit-text-stroke:14px #000;text-shadow:10px 10px 0 #000;transform:skewX(-8deg)}
+#outro .xp{font-family:"Bungee","Noto Sans TC";font-size:42px;color:#7dff9a;-webkit-text-stroke:5px #000;paint-order:stroke fill;margin:6px 0 50px}
+#outro .k{color:#fff;-webkit-text-stroke:6px #000;paint-order:stroke fill;font-size:52px}
+#outro .m{font-size:100px;-webkit-text-stroke:12px #000;text-shadow:8px 8px 0 #000;margin:10px 0 50px}
+#outro .nx{border:none;border-radius:6px;background:#000;border-left:12px solid #ff2f8f;transform:skewX(-6deg)}
+#outro .nx small{font-family:"Bungee";color:#ff7ac0}
