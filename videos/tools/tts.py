@@ -19,5 +19,8 @@ for s in segs:
             else: open(out,"wb").write(d)
             print(s["id"],"ok",flush=True); break
         except Exception as e:
+            body=getattr(e,"read",lambda:b"")().decode("utf-8","ignore")
+            if "per_day" in body or "PerDay" in body:
+                raise SystemExit(f"{s['id']}: Gemini TTS daily quota exhausted, stopping")
             print(s["id"],"retry",attempt,e,flush=True); time.sleep(25)
     time.sleep(12)

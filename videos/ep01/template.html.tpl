@@ -359,7 +359,7 @@ function swingLabels(d, prefix, p0, p1, t, names) { // names(s, idx) -> [text, c
 function chunks(text) {
   const parts = text.replace(/([，。？！；：、])/g, "$1|").split("|").filter(Boolean);
   const out = []; let cur = "";
-  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！；]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
+  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！；：]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
   if (cur) out.push(cur); return out.map((c) => c.replace(/[，。；：、]$/, ""));
 }
 const SUBS = []; EP.segs.forEach((s) => { const cs = chunks(s.text), tot = cs.reduce((a, c) => a + c.length + 2, 0); let acc = 0;

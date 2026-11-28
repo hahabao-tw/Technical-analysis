@@ -2,11 +2,14 @@
 <!--
   EP01 市場結構：用高低點判斷趨勢
   Seek-safe: everything is drawn by render(t), driven by one linear GSAP clock.
-  Built by build.py, which fills in {"total": 87.64, "segs": [{"id": "s1", "text": "畫了一堆線，卻說不出現在是多頭還是空頭？今天用最原始、也最可靠的方法看懂趨勢：市場結構。", "start": 0.4, "dur": 10.167}, {"id": "s2", "text": "先把K線上的轉折點找出來。漲上去之後回頭的地方，叫波段高點；跌下來之後反彈的地方，叫波段低點。", "start": 11.017, "dur": 10.061}, {"id": "s3", "text": "如果高點一個比一個高，低點也一個比一個高，這就是多頭結構，也就是更高的高點、更高的低點。", "start": 21.528, "dur": 9.557}, {"id": "s4", "text": "反過來，高點越來越低，低點也越來越低，就是空頭結構。", "start": 31.535, "dur": 5.91}, {"id": "s5", "text": "如果高點和低點忽高忽低、沒有方向，那就是盤整，這時候順勢操作最容易被來回洗。", "start": 37.895, "dur": 7.984}, {"id": "s6", "text": "重點來了。多頭什麼時候結束？當價格反彈過不了前高，接著又跌破前一個低點，結構就被破壞了，這是趨勢可能反轉的第一個警訊。", "start": 46.328, "dur": 13.608}, {"id": "s7", "text": "常見的錯誤有兩個：第一，看到一根大黑K就喊反轉；第二，盤中跌破就當真。比較穩健的做法，是等收盤價確認跌破，而且固定用同一個時間週期來判斷。", "start": 60.387, "dur": 15.68}, {"id": "s8", "text": "記住一句話：趨勢，就是高低點的方向。下一集，我們來聊為什麼跌破的支撐，會變成壓力。", "start": 76.517, "dur": 9.32}]} / <audio id="a_s1" src="audio/s1.wav" data-start="0.400" data-duration="10.167" data-track-index="2"></audio>
+  Built by build.py, which fills in {"total": 88.2, "segs": [{"id": "s1", "text": "畫了一堆線，卻說不出現在是多頭還是空頭？今天用最原始、也最可靠的方法看懂趨勢：市場結構。", "start": 0.4, "dur": 10.167}, {"id": "s2", "text": "先把K線上的轉折點找出來。漲上去之後回頭的地方，叫波段高點；跌下來之後反彈的地方，叫波段低點。", "start": 11.017, "dur": 10.061}, {"id": "s3", "text": "如果高點一個比一個高，低點也一個比一個高，這就是多頭結構，也就是更高的高點、更高的低點。", "start": 21.528, "dur": 9.557}, {"id": "s4", "text": "反過來，高點越來越低，低點也越來越低，就是空頭結構。", "start": 31.535, "dur": 6.544}, {"id": "s5", "text": "如果高點和低點忽高忽低、沒有方向，那就是盤整，這時候順勢操作最容易被來回洗。", "start": 38.529, "dur": 7.984}, {"id": "s6", "text": "重點來了。多頭什麼時候結束？當價格反彈過不了前高，接著又跌破前一個低點，結構就被破壞了，這是趨勢可能反轉的第一個警訊。", "start": 46.962, "dur": 13.608}, {"id": "s7", "text": "常見的錯誤有兩個：第一，看到一根大黑K就喊反轉；第二，盤中跌破就當真。比較穩健的做法，是等收盤價確認跌破，而且固定用同一個時間週期來判斷。", "start": 61.021, "dur": 16.032}, {"id": "s8", "text": "記住一句話：趨勢，就是高低點的方向。下一集，我們來聊為什麼跌破的支撐，會變成壓力。", "start": 77.503, "dur": 8.896}]} / <audio id="a_s1" src="audio/s1.wav" data-start="0.400" data-duration="10.167" data-track-index="2"></audio>
   <audio id="a_s2" src="audio/s2.wav" data-start="11.017" data-duration="10.061" data-track-index="3"></audio>
   <audio id="a_s3" src="audio/s3.wav" data-start="21.528" data-duration="9.557" data-track-index="2"></audio>
-  <audio id="a_s5" src="audio/s5.wav" data-start="37.895" data-duration="7.984" data-track-index="2"></audio>
-  <audio id="a_s6" src="audio/s6.wav" data-start="46.328" data-duration="13.608" data-track-index="3"></audio> from the narration audio.
+  <audio id="a_s4" src="audio/s4.wav" data-start="31.535" data-duration="6.544" data-track-index="3"></audio>
+  <audio id="a_s5" src="audio/s5.wav" data-start="38.529" data-duration="7.984" data-track-index="2"></audio>
+  <audio id="a_s6" src="audio/s6.wav" data-start="46.962" data-duration="13.608" data-track-index="3"></audio>
+  <audio id="a_s7" src="audio/s7.wav" data-start="61.021" data-duration="16.032" data-track-index="2"></audio>
+  <audio id="a_s8" src="audio/s8.wav" data-start="77.503" data-duration="8.896" data-track-index="3"></audio> from the narration audio.
 -->
 <html lang="zh-Hant">
 <head>
@@ -70,8 +73,8 @@
 <link rel="stylesheet" href="theme.css" />
 </head>
 <body>
-<div id="root" data-composition-id="ep01" data-start="0" data-duration="87.64" data-width="1080" data-height="1920" data-fps="30">
-  <canvas id="cv" class="clip" data-start="0" data-duration="87.64" data-track-index="1"></canvas>
+<div id="root" data-composition-id="ep01" data-start="0" data-duration="88.2" data-width="1080" data-height="1920" data-fps="30">
+  <canvas id="cv" class="clip" data-start="0" data-duration="88.2" data-track-index="1"></canvas>
   <div id="labels" class="ov" style="inset:0"></div>
   <div id="flash" class="ov"></div>
   <div id="prog" class="ov"></div>
@@ -92,12 +95,15 @@
   <audio id="a_s1" src="audio/s1.wav" data-start="0.400" data-duration="10.167" data-track-index="2"></audio>
   <audio id="a_s2" src="audio/s2.wav" data-start="11.017" data-duration="10.061" data-track-index="3"></audio>
   <audio id="a_s3" src="audio/s3.wav" data-start="21.528" data-duration="9.557" data-track-index="2"></audio>
-  <audio id="a_s5" src="audio/s5.wav" data-start="37.895" data-duration="7.984" data-track-index="2"></audio>
-  <audio id="a_s6" src="audio/s6.wav" data-start="46.328" data-duration="13.608" data-track-index="3"></audio>
+  <audio id="a_s4" src="audio/s4.wav" data-start="31.535" data-duration="6.544" data-track-index="3"></audio>
+  <audio id="a_s5" src="audio/s5.wav" data-start="38.529" data-duration="7.984" data-track-index="2"></audio>
+  <audio id="a_s6" src="audio/s6.wav" data-start="46.962" data-duration="13.608" data-track-index="3"></audio>
+  <audio id="a_s7" src="audio/s7.wav" data-start="61.021" data-duration="16.032" data-track-index="2"></audio>
+  <audio id="a_s8" src="audio/s8.wav" data-start="77.503" data-duration="8.896" data-track-index="3"></audio>
 </div>
 
 <script>
-  window.__EP = {"total": 87.64, "segs": [{"id": "s1", "text": "畫了一堆線，卻說不出現在是多頭還是空頭？今天用最原始、也最可靠的方法看懂趨勢：市場結構。", "start": 0.4, "dur": 10.167}, {"id": "s2", "text": "先把K線上的轉折點找出來。漲上去之後回頭的地方，叫波段高點；跌下來之後反彈的地方，叫波段低點。", "start": 11.017, "dur": 10.061}, {"id": "s3", "text": "如果高點一個比一個高，低點也一個比一個高，這就是多頭結構，也就是更高的高點、更高的低點。", "start": 21.528, "dur": 9.557}, {"id": "s4", "text": "反過來，高點越來越低，低點也越來越低，就是空頭結構。", "start": 31.535, "dur": 5.91}, {"id": "s5", "text": "如果高點和低點忽高忽低、沒有方向，那就是盤整，這時候順勢操作最容易被來回洗。", "start": 37.895, "dur": 7.984}, {"id": "s6", "text": "重點來了。多頭什麼時候結束？當價格反彈過不了前高，接著又跌破前一個低點，結構就被破壞了，這是趨勢可能反轉的第一個警訊。", "start": 46.328, "dur": 13.608}, {"id": "s7", "text": "常見的錯誤有兩個：第一，看到一根大黑K就喊反轉；第二，盤中跌破就當真。比較穩健的做法，是等收盤價確認跌破，而且固定用同一個時間週期來判斷。", "start": 60.387, "dur": 15.68}, {"id": "s8", "text": "記住一句話：趨勢，就是高低點的方向。下一集，我們來聊為什麼跌破的支撐，會變成壓力。", "start": 76.517, "dur": 9.32}]};
+  window.__EP = {"total": 88.2, "segs": [{"id": "s1", "text": "畫了一堆線，卻說不出現在是多頭還是空頭？今天用最原始、也最可靠的方法看懂趨勢：市場結構。", "start": 0.4, "dur": 10.167}, {"id": "s2", "text": "先把K線上的轉折點找出來。漲上去之後回頭的地方，叫波段高點；跌下來之後反彈的地方，叫波段低點。", "start": 11.017, "dur": 10.061}, {"id": "s3", "text": "如果高點一個比一個高，低點也一個比一個高，這就是多頭結構，也就是更高的高點、更高的低點。", "start": 21.528, "dur": 9.557}, {"id": "s4", "text": "反過來，高點越來越低，低點也越來越低，就是空頭結構。", "start": 31.535, "dur": 6.544}, {"id": "s5", "text": "如果高點和低點忽高忽低、沒有方向，那就是盤整，這時候順勢操作最容易被來回洗。", "start": 38.529, "dur": 7.984}, {"id": "s6", "text": "重點來了。多頭什麼時候結束？當價格反彈過不了前高，接著又跌破前一個低點，結構就被破壞了，這是趨勢可能反轉的第一個警訊。", "start": 46.962, "dur": 13.608}, {"id": "s7", "text": "常見的錯誤有兩個：第一，看到一根大黑K就喊反轉；第二，盤中跌破就當真。比較穩健的做法，是等收盤價確認跌破，而且固定用同一個時間週期來判斷。", "start": 61.021, "dur": 16.032}, {"id": "s8", "text": "記住一句話：趨勢，就是高低點的方向。下一集，我們來聊為什麼跌破的支撐，會變成壓力。", "start": 77.503, "dur": 8.896}]};
   (function () {
     var total = window.__EP.total;
     var clock = { t: 0 };
@@ -367,7 +373,7 @@ function swingLabels(d, prefix, p0, p1, t, names) { // names(s, idx) -> [text, c
 function chunks(text) {
   const parts = text.replace(/([，。？！；：、])/g, "$1|").split("|").filter(Boolean);
   const out = []; let cur = "";
-  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！；]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
+  for (const p of parts) { if (cur && ((cur + p).length > 15 || /[。？！；：]$/.test(cur))) { out.push(cur); cur = p; } else cur += p; }
   if (cur) out.push(cur); return out.map((c) => c.replace(/[，。；：、]$/, ""));
 }
 const SUBS = []; EP.segs.forEach((s) => { const cs = chunks(s.text), tot = cs.reduce((a, c) => a + c.length + 2, 0); let acc = 0;
